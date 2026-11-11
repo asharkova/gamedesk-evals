@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f8">
+  <meta name="description" content="An independent gaming support evaluation workspace. Review draft test scenarios and policy references.">
+  <title>GameDesk · Evaluation workspace</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to workspace</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="#assistant" aria-label="GameDesk home"><span class="brand-mark" aria-hidden="true">g</span><span>GameDesk<span class="brand-caption">SUPPORT LAB</span></span></a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav>
+        <button class="nav-button active" data-view="assistant" aria-current="page"><span aria-hidden="true">↗</span> Assistant</button>
+        <button class="nav-button" data-view="cases"><span aria-hidden="true">☷</span> Test cases <span class="count" id="case-count">—</span></button>
+        <button class="nav-button" data-view="sources"><span aria-hidden="true">▤</span> Policy sources</button>
+      </nav>
+      <div class="sidebar-note"><span class="tiny-label">PROJECT STATUS</span><strong>Building the foundation</strong><p>Review the requirements.<br>Connect a model next.</p><span class="version">Independent portfolio project</span></div>
+    </aside>
+    <div class="main-shell">
+      <header class="topbar"><div><span class="breadcrumb">Workspace <span>/</span></span> <strong id="view-title">Assistant</strong></div><span class="mode-label"><span aria-hidden="true"></span> Reference mode</span></header>
+      <main id="workspace" tabindex="-1">
+        <section id="assistant-view" class="view assistant-layout" aria-label="Reference assistant">
+          <div class="conversation-column">
+            <div class="conversation-heading"><div><span class="eyebrow">PLAYSTATION STORE · CANADA</span><h1>Purchase support</h1><p>Explore a question. Inspect the policy behind the answer.</p></div><button class="text-button" id="reset-button">New session <span aria-hidden="true">↻</span></button></div>
+            <div class="reference-notice"><span aria-hidden="true">ⓘ</span><p><strong>Reference examples, not live AI.</strong> Answers are drafted examples awaiting your review. No model or evaluations are connected.</p></div>
+            <div id="messages" class="messages" role="log" aria-label="Conversation" aria-live="polite"></div>
+            <div id="welcome" class="welcome"><div class="conversation-symbol" aria-hidden="true">↗</div><h2>Start with a sample question</h2><p>Choose a case to see its draft answer and supporting rules.</p><div id="sample-buttons" class="sample-buttons"></div><div class="scope-note">Examples assume a Canadian PlayStation Store game purchase unless stated otherwise.</div></div>
+            <form id="question-form" class="composer"><label for="question">Your question</label><textarea id="question" rows="3" maxlength="2000" placeholder="Select a sample question to begin…" aria-describedby="composer-hint"></textarea><div class="composer-bottom"><span id="composer-hint">Sample answers only · no account access</span><button class="primary-button" id="send-button" type="submit">Show reference <span aria-hidden="true">↑</span></button></div><p id="question-error" class="form-error" role="alert" hidden></p></form>
+            <footer class="conversation-footer"><span>No refunds or account actions are performed.</span><button class="text-button" id="export-button" disabled>Export session <span aria-hidden="true">↓</span></button></footer>
+          </div>
+          <aside class="inspector" aria-label="Case details"><div class="inspector-heading"><span class="tiny-label">CONTEXT</span><span class="context-dot" aria-hidden="true"></span></div><h2>Behind the answer</h2><p class="inspector-intro">A traceable answer starts with a clear requirement.</p><dl class="metadata"><div><dt>Policy region</dt><dd>Canada</dd></div><div><dt>Snapshot reviewed</dt><dd id="review-date">—</dd></div><div><dt>Evaluation</dt><dd>Not run</dd></div></dl><div id="case-details" class="case-details"><span class="tiny-label">SELECT A CASE</span><p>The expected decision and its source requirements will appear here.</p></div><div class="inspector-footer"><span class="tiny-label">YOUR PART</span><p>Check the source. Challenge the expected answer. Add cases the draft missed.</p></div></aside>
+        </section>
+        <section id="cases-view" class="view document-view" hidden><span class="eyebrow">DATASET · DEVELOPMENT</span><h1>Test cases</h1><p class="page-description">AI-drafted starting points. Review each expected decision before using it as an evaluation target.</p><div class="list-toolbar"><label for="case-filter">Find a case<input id="case-filter" type="search" placeholder="Search questions or categories"></label><span id="visible-count"></span></div><div id="case-list" class="case-list"></div><p class="empty-search" id="empty-search" hidden>No matching cases. Try another search.</p></section>
+        <section id="sources-view" class="view document-view" hidden><span class="eyebrow">REQUIREMENTS · VERSION 0.1</span><h1>Policy sources</h1><p class="page-description">Public policy summaries and separate assistant design requirements. This is an independent learning project, not official PlayStation support.</p><div id="source-links" class="source-links"></div><h2 class="section-title">Source-derived policies</h2><div id="policy-list" class="rule-list"></div><h2 class="section-title">Assistant design requirements</h2><div id="app-rule-list" class="rule-list"></div></section>
+        <div id="loading-error" class="loading-error" role="alert" hidden>Could not load the project data. Reload the page, or start the local server as described in the README.</div>
+      </main>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
