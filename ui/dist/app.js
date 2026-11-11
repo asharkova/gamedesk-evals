@@ -29,6 +29,8 @@ let requirements;
 let dataset;
 let selectedCase = null;
 let session = [];
+let backend = null;
+let pending = false;
 const node = (tag, className, text) => {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -69,22 +71,55 @@ function showCase(testCase) {
   navigate('assistant');
   elements.question.focus({ preventScroll: true });
 }
-function addMessage(role, text, testCase) {
+function addMessage(role, text, testCase = null, result = null) {
   const article = node('article', `message ${role}`);
-  article.append(node('div', 'message-heading', role === 'user' ? 'YOU' : 'GAMEDESK / DRAFT REFERENCE'), node('p', '', text));
-  if (role === 'reference') {
+  article.append(node('div', 'message-heading', role === 'user' ? 'YOU' : role === 'generated' ? 'GAMEDESK / MODEL ANSWER' : 'GAMEDESK / DRAFT REFERENCE'), node('p', '', text));
+  if (role !== 'user') {
     const links = node('div', 'message-rules');
-    for (const identifier of testCase.rule_ids) {
+    for (const identifier of result?.rule_ids || testCase.rule_ids) {
       const rule = [...requirements.policy_requirements, ...requirements.assistant_requirements].find((item) => item.id === identifier);
+      if (!rule) continue;
       const link = node('a', 'rule-link', identifier);
       link.href = sourceLink(rule);
       if (rule.source) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
       links.append(link);
     }
-    article.append(links, node('div', 'message-meta', `${testCase.id} · AI-drafted, unreviewed · No model run or score`));
+    const provenance = result ? `${result.provider} / ${result.model} · ${result.latency_ms} ms · Not evaluated` : `${testCase.id} · AI-drafted, unreviewed · No model run or score`;
+    article.append(links, node('div', 'message-meta', provenance));
   }
   elements.messages.append(article);
-  session.push({ role, text, case_id: testCase.id, provenance: 'AI-drafted reference example; not model output' });
+  session.push({ role, text, case_id: testCase?.id || null, provenance: role === 'generated' ? 'Live hosted-model output; not evaluated' : role === 'user' ? 'User question' : 'AI-drafted reference example; not model output', ...(result ? { result } : {}) });
+}
+
+function setMode() {
+  const live = select('#answer-mode').value === 'live';
+  select('.mode-label').replaceChildren(node('span'), document.createTextNode(live ? 'Live API mode' : 'Reference mode'));
+  select('#mode-notice').textContent = live
+    ? 'Questions and public requirements are sent to Groq. Each question is independent; earlier messages are not sent. Model answers can be wrong and have not been evaluated. Do not enter personal or account information.'
+    : 'Reference examples, not live AI. Answers are drafted examples awaiting your review. Choose an unchanged sample question.';
+  select('#send-button').textContent = live ? 'Ask GameDesk ↑' : 'Show reference ↑';
+  select('#composer-hint').textContent = live ? 'Groq hosted model · independent questions' : 'Sample answers only · no account access';
+  elements.question.placeholder = live ? 'Ask about a PlayStation Store purchase…' : 'Select a sample question to begin…';
+  elements.error.hidden = true;
+}
+
+async function detectBackend() {
+  try {
+    const response = await fetch('/api/status', { signal: AbortSignal.timeout(4000) });
+    if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) throw new Error('No backend');
+    backend = await response.json();
+    if (backend.configured) {
+      const option = select('#answer-mode option[value="live"]');
+      option.disabled = false; option.textContent = 'Live AI · Groq';
+      select('#answer-mode').value = 'live';
+      select('#connection-status').textContent = 'Key configured · first request will verify access';
+      setMode();
+    } else {
+      select('#connection-status').textContent = 'To enable AI: python3 server.py --setup-key, then restart';
+    }
+  } catch {
+    select('#connection-status').textContent = 'Static preview · run the Python server locally for live AI';
+  }
 }
 function renderCases(query = '') {
   const matches = dataset.cases.filter((testCase) => `${testCase.id} ${testCase.question} ${testCase.category}`.toLowerCase().includes(query.toLowerCase()));
@@ -123,9 +158,40 @@ function renderSources() {
 }
 document.querySelectorAll('.nav-button').forEach((button) => button.addEventListener('click', () => { location.hash = button.dataset.view; }));
 window.addEventListener('hashchange', () => navigate(location.hash.slice(1)));
-select('#question-form').addEventListener('submit', (event) => {
+select('#answer-mode').addEventListener('change', setMode);
+select('#question-form').addEventListener('submit', async (event) => {
   event.preventDefault();
+  if (pending) return;
   const question = elements.question.value.trim();
+  if (select('#answer-mode').value === 'live') {
+    if (!question) { elements.error.textContent = 'Enter a question first.'; elements.error.hidden = false; return; }
+    const testCase = selectedCase?.question === question ? selectedCase : null;
+    pending = true;
+    select('#send-button').disabled = true; select('#reset-button').disabled = true; select('#answer-mode').disabled = true;
+    select('#connection-status').textContent = 'Waiting for Groq…'; elements.error.hidden = true;
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(55000),
+        body: JSON.stringify({ question, scenario_context: testCase ? dataset.base_facts : '' }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'The model request failed.');
+      elements.welcome.hidden = true;
+      addMessage('user', question, testCase);
+      addMessage('generated', result.answer, testCase, result);
+      session[session.length - 1].scenario_context = testCase ? dataset.base_facts : '';
+      elements.details.replaceChildren(node('span', 'draft-label', 'Live output · not evaluated'), node('h3', 'case-title', `Model decision: ${labels[result.decision] || result.decision}`), node('p', '', `${result.model} · ${result.latency_ms} ms`), node('p', '', testCase ? `${testCase.id} draft expectation: ${labels[testCase.decision]}. No automatic comparison has run.` : 'Custom question. No expected answer or evaluation score is available.'));
+      elements.export.disabled = false;
+      select('#connection-status').textContent = 'Response received · Groq connection verified';
+      elements.messages.lastElementChild.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
+    } catch (error) {
+      elements.error.textContent = error.name === 'TimeoutError' ? 'The request timed out. Please try again.' : error.message;
+      elements.error.hidden = false; select('#connection-status').textContent = 'Request failed · no reference answer substituted';
+    } finally {
+      pending = false; select('#send-button').disabled = false; select('#reset-button').disabled = false; select('#answer-mode').disabled = false;
+    }
+    return;
+  }
   if (!selectedCase || question !== selectedCase.question) {
     elements.error.textContent = question ? 'Custom questions need a connected model. This preview only displays draft reference answers for the original sample questions. Choose a sample or open a test case.' : 'Choose a sample question below, or open one from Test cases.';
     elements.error.hidden = false; return;
@@ -145,9 +211,9 @@ select('#reset-button').addEventListener('click', () => {
   elements.details.replaceChildren(node('span', 'tiny-label', 'SELECT A CASE'), node('p', '', 'The expected decision and its source requirements will appear here.'));
 });
 elements.export.addEventListener('click', () => {
-  const payload = { mode: 'reference_only', model: null, evaluation_run: false, review_status: 'AI-drafted; human review pending', dataset_version: dataset.version, exported_at: new Date().toISOString(), messages: session };
+  const payload = { mode: session.some((message) => message.role === 'generated') ? 'contains_live_model_outputs' : 'reference_only', models: [...new Set(session.filter((message) => message.result).map((message) => message.result.model))], evaluation_run: false, review_status: 'Human review pending', dataset_version: dataset.version, exported_at: new Date().toISOString(), messages: session };
   const url = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' }));
-  const link = node('a'); link.href = url; link.download = 'gamedesk-reference-session.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const link = node('a'); link.href = url; link.download = 'gamedesk-session.json'; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
 });
 try {
   const responses = await Promise.all([fetch('./requirements.json'), fetch('./cases.json')]);
@@ -163,6 +229,7 @@ try {
     select('#sample-buttons').append(button);
   }
   renderCases(); renderSources(); navigate(location.hash.slice(1));
+  await detectBackend();
 } catch (error) {
   select('#loading-error').hidden = false; select('#send-button').disabled = true;
   select('#case-filter').disabled = true;
