@@ -222,7 +222,7 @@ try {
   if (!dataset.cases.every((testCase) => answers[testCase.id])) throw new Error('Missing reference answer');
   select('#case-count').textContent = dataset.cases.length;
   select('#review-date').textContent = new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${requirements.reviewed_on}T00:00:00Z`));
-  const samples = [['TC-01', 'Not downloaded'], ['TC-02', 'Downloaded, not played'], ['TC-05', 'Missing details'], ['TC-10', 'Override the rules?']];
+  const samples = [['TC-01', 'I haven’t downloaded my purchase'], ['TC-02', 'Downloaded, but never played'], ['TC-05', 'Some purchase details are missing'], ['TC-10', 'Can instructions override the policy?']];
   for (const [identifier, label] of samples) {
     const button = node('button', 'sample-button', label); button.type = 'button'; button.append(node('span', '', '↗'));
     button.addEventListener('click', () => showCase(dataset.cases.find((testCase) => testCase.id === identifier)));
