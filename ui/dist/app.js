@@ -56,12 +56,12 @@ function showCase(testCase) {
   selectedCase = testCase;
   elements.question.value = testCase.question;
   elements.error.hidden = true;
-  elements.details.replaceChildren(node('span', 'draft-label', 'AI-drafted · needs review'), node('div', 'tiny-label', `${testCase.id} / ${testCase.category.replaceAll('_', ' ')}`), node('h3', 'case-title', `Expected: ${labels[testCase.decision]}`));
+  elements.details.replaceChildren(node('span', 'draft-label', 'AI draft · unreviewed'), node('div', 'tiny-label', `${testCase.id} / ${testCase.category.replaceAll('_', ' ')}`), node('h3', 'case-title', `Expected: ${labels[testCase.decision]}`));
   const allRules = [...requirements.policy_requirements, ...requirements.assistant_requirements];
   for (const identifier of testCase.rule_ids) {
     const rule = allRules.find((item) => item.id === identifier);
     const block = node('div', 'rule-reference');
-    const link = node('a', '', rule.id + (rule.source ? ' ↗' : ' · project requirement'));
+    const link = node('a', '', rule.id + (rule.source ? ' ↗' : ' · app rule'));
     link.href = sourceLink(rule);
     if (rule.source) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
     block.append(link, node('p', '', rule.requirement));
@@ -73,7 +73,7 @@ function showCase(testCase) {
 }
 function addMessage(role, text, testCase = null, result = null) {
   const article = node('article', `message ${role}`);
-  article.append(node('div', 'message-heading', role === 'user' ? 'YOU' : role === 'generated' ? 'GAMEDESK / MODEL ANSWER' : 'GAMEDESK / DRAFT REFERENCE'), node('p', '', text));
+  article.append(node('div', 'message-heading', role === 'user' ? 'YOU' : role === 'generated' ? 'GAMEDESK / AI' : 'GAMEDESK / EXAMPLE'), node('p', '', text));
   if (role !== 'user') {
     const links = node('div', 'message-rules');
     for (const identifier of result?.rule_ids || testCase.rule_ids) {
@@ -84,7 +84,7 @@ function addMessage(role, text, testCase = null, result = null) {
       if (rule.source) { link.target = '_blank'; link.rel = 'noopener noreferrer'; }
       links.append(link);
     }
-    const provenance = result ? `${result.provider} / ${result.model} · ${result.latency_ms} ms · Not evaluated` : `${testCase.id} · AI-drafted, unreviewed · No model run or score`;
+    const provenance = result ? `${result.model} · ${result.latency_ms} ms · Not evaluated` : `${testCase.id} · AI draft · unreviewed`;
     article.append(links, node('div', 'message-meta', provenance));
   }
   elements.messages.append(article);
@@ -93,13 +93,13 @@ function addMessage(role, text, testCase = null, result = null) {
 
 function setMode() {
   const live = select('#answer-mode').value === 'live';
-  select('.mode-label').replaceChildren(node('span'), document.createTextNode(live ? 'Live API mode' : 'Reference mode'));
+  select('.mode-label').replaceChildren(node('span'), document.createTextNode(live ? 'Live AI' : 'Examples'));
   select('#mode-notice').textContent = live
-    ? 'Questions and public requirements are sent to Groq. Each question is independent; earlier messages are not sent. Model answers can be wrong and have not been evaluated. Do not enter personal or account information.'
-    : 'Reference examples, not live AI. Answers are drafted examples awaiting your review. Choose an unchanged sample question.';
-  select('#send-button').textContent = live ? 'Ask GameDesk ↑' : 'Show reference ↑';
-  select('#composer-hint').textContent = live ? 'Groq hosted model · independent questions' : 'Sample answers only · no account access';
-  elements.question.placeholder = live ? 'Ask about a PlayStation Store purchase…' : 'Select a sample question to begin…';
+    ? 'Sent to Groq · each question is independent. Don’t share personal details.'
+    : 'Draft examples · not live AI.';
+  select('#send-button').textContent = live ? 'Send ↑' : 'Show answer ↑';
+  select('#composer-hint').textContent = live ? 'Groq · not evaluated' : 'Draft answer';
+  elements.question.placeholder = live ? 'Ask about your purchase…' : 'Choose an example…';
   elements.error.hidden = true;
 }
 
@@ -112,13 +112,13 @@ async function detectBackend() {
       const option = select('#answer-mode option[value="live"]');
       option.disabled = false; option.textContent = 'Live AI · Groq';
       select('#answer-mode').value = 'live';
-      select('#connection-status').textContent = 'Key configured · first request will verify access';
+      select('#connection-status').textContent = 'Key set · not yet verified';
       setMode();
     } else {
-      select('#connection-status').textContent = 'To enable AI: python3 server.py --setup-key, then restart';
+      select('#connection-status').textContent = 'API key needed';
     }
   } catch {
-    select('#connection-status').textContent = 'Static preview · run the Python server locally for live AI';
+    select('#connection-status').textContent = 'Preview only';
   }
 }
 function renderCases(query = '') {
@@ -127,7 +127,7 @@ function renderCases(query = '') {
   for (const testCase of matches) {
     const row = node('article', 'case-row');
     const content = node('div');
-    content.append(node('span', 'category', `${testCase.category.replaceAll('_', ' ')} · AI-drafted · needs review`), node('p', '', testCase.question), node('span', 'category', `Expected: ${labels[testCase.decision]}`));
+    content.append(node('span', 'category', testCase.category.replaceAll('_', ' ')), node('p', '', testCase.question), node('span', 'category', `Expected: ${labels[testCase.decision]}`));
     const button = node('button', 'text-button', 'Open case ↗');
     button.setAttribute('aria-label', `Open case ${testCase.id}`);
     button.addEventListener('click', () => showCase(testCase));
@@ -180,20 +180,20 @@ select('#question-form').addEventListener('submit', async (event) => {
       addMessage('user', question, testCase);
       addMessage('generated', result.answer, testCase, result);
       session[session.length - 1].scenario_context = testCase ? dataset.base_facts : '';
-      elements.details.replaceChildren(node('span', 'draft-label', 'Live output · not evaluated'), node('h3', 'case-title', `Model decision: ${labels[result.decision] || result.decision}`), node('p', '', `${result.model} · ${result.latency_ms} ms`), node('p', '', testCase ? `${testCase.id} draft expectation: ${labels[testCase.decision]}. No automatic comparison has run.` : 'Custom question. No expected answer or evaluation score is available.'));
+      elements.details.replaceChildren(node('span', 'draft-label', 'Not evaluated'), node('h3', 'case-title', `Decision: ${labels[result.decision] || result.decision}`), node('p', '', `${result.model} · ${result.latency_ms} ms`), node('p', '', testCase ? `${testCase.id} expected: ${labels[testCase.decision]}` : 'Custom question'));
       elements.export.disabled = false;
-      select('#connection-status').textContent = 'Response received · Groq connection verified';
+      select('#connection-status').textContent = 'Connected to Groq';
       elements.messages.lastElementChild.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'nearest' });
     } catch (error) {
       elements.error.textContent = error.name === 'TimeoutError' ? 'The request timed out. Please try again.' : error.message;
-      elements.error.hidden = false; select('#connection-status').textContent = 'Request failed · no reference answer substituted';
+      elements.error.hidden = false; select('#connection-status').textContent = 'Request failed';
     } finally {
       pending = false; select('#send-button').disabled = false; select('#reset-button').disabled = false; select('#answer-mode').disabled = false;
     }
     return;
   }
   if (!selectedCase || question !== selectedCase.question) {
-    elements.error.textContent = question ? 'Custom questions need a connected model. This preview only displays draft reference answers for the original sample questions. Choose a sample or open a test case.' : 'Choose a sample question below, or open one from Test cases.';
+    elements.error.textContent = question ? 'Choose an unchanged example, or switch to Live AI for custom questions.' : 'Choose an example first.';
     elements.error.hidden = false; return;
   }
   elements.error.hidden = true; elements.welcome.hidden = true;
@@ -208,7 +208,7 @@ select('#case-filter').addEventListener('input', (event) => renderCases(event.ta
 select('#reset-button').addEventListener('click', () => {
   session = []; selectedCase = null; elements.messages.replaceChildren(); elements.welcome.hidden = false;
   elements.question.value = ''; elements.error.hidden = true; elements.export.disabled = true;
-  elements.details.replaceChildren(node('span', 'tiny-label', 'SELECT A CASE'), node('p', '', 'The expected decision and its source requirements will appear here.'));
+  elements.details.replaceChildren(node('p', '', 'Choose a case to see its rules.'));
 });
 elements.export.addEventListener('click', () => {
   const payload = { mode: session.some((message) => message.role === 'generated') ? 'contains_live_model_outputs' : 'reference_only', models: [...new Set(session.filter((message) => message.result).map((message) => message.result.model))], evaluation_run: false, review_status: 'Human review pending', dataset_version: dataset.version, exported_at: new Date().toISOString(), messages: session };
@@ -222,13 +222,14 @@ try {
   if (!dataset.cases.every((testCase) => answers[testCase.id])) throw new Error('Missing reference answer');
   select('#case-count').textContent = dataset.cases.length;
   select('#review-date').textContent = new Intl.DateTimeFormat('en-CA', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${requirements.reviewed_on}T00:00:00Z`));
-  const samples = [['TC-01', 'I haven’t downloaded my purchase'], ['TC-02', 'Downloaded, but never played'], ['TC-05', 'Some purchase details are missing'], ['TC-10', 'Can instructions override the policy?']];
+  const samples = [['TC-01', 'Not downloaded'], ['TC-02', 'Downloaded, not played'], ['TC-05', 'Missing details'], ['TC-10', 'Override the rules?']];
   for (const [identifier, label] of samples) {
     const button = node('button', 'sample-button', label); button.type = 'button'; button.append(node('span', '', '↗'));
     button.addEventListener('click', () => showCase(dataset.cases.find((testCase) => testCase.id === identifier)));
     select('#sample-buttons').append(button);
   }
   renderCases(); renderSources(); navigate(location.hash.slice(1));
+  setMode();
   await detectBackend();
 } catch (error) {
   select('#loading-error').hidden = false; select('#send-button').disabled = true;
