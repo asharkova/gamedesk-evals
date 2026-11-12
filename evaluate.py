@@ -5,6 +5,7 @@ from pathlib import Path
 import time
 
 from server import ChatError, ROOT, generate_answer, load_configuration
+from gamedesk_tracing import flush_traces, initialize_tracing
 
 
 def check_answer(test_case, actual):
@@ -82,9 +83,13 @@ def main():
     configuration = load_configuration()
     if not configuration["key"]:
         parser.error("Set up your key first: python3 server.py --setup-key")
+    initialize_tracing()
     dataset = json.loads((ROOT / "cases.json").read_text())
     requirements = json.loads((ROOT / "requirements.json").read_text())
-    report = run_evaluation(dataset, requirements, configuration, args.limit, args.interval, lambda line: print(line, flush=True))
+    try:
+        report = run_evaluation(dataset, requirements, configuration, args.limit, args.interval, lambda line: print(line, flush=True))
+    finally:
+        flush_traces()
     output = args.output or ROOT / "results" / "private" / (datetime.now(timezone.utc).strftime("run-%Y%m%dT%H%M%S%fZ") + ".json")
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")

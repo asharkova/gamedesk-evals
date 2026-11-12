@@ -32,6 +32,12 @@ Run `python3 evaluate.py --limit 3` for a small live check, or `python3 evaluate
 
 A pass means those specific checks matched the draft expectation. It does not prove every sentence is correct. Review unsupported claims and confirm the expected answers yourself.
 
+## Phoenix dashboard
+
+Phoenix uses a separate Python 3.13 environment. To reproduce the setup, create a `.venv` with Python 3.13 and install `requirements-phoenix.txt` into it. Start the dashboard with `python3 start_phoenix.py`, then open http://127.0.0.1:6006.
+
+Run `.venv/bin/python server.py` for traced chat or `.venv/bin/python evaluate.py --limit 3` for traced checks. Open the `gamedesk` project in Phoenix. Traces contain the question, policy prompt, answer, model, duration, and error status, but not API keys or request headers. Trace IDs are also saved in model responses and evaluation reports. Data stays in ignored `results/private/phoenix/`. Set `GAMEDESK_TRACING=0` to disable capture. Prompts and answers may contain whatever you submit, so use synthetic data.
+
 ## Policy sources
 
 Reviewed November 11, 2026:

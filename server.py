@@ -9,6 +9,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from gamedesk_tracing import flush_traces, initialize_tracing, trace_model_call
+
 
 ROOT = Path(__file__).resolve().parent
 API_URL = "https://api.groq.com/openai/v1/chat/completions"
@@ -79,6 +81,14 @@ def make_payload(question, scenario_context, requirements, model):
 
 
 def generate_answer(question, scenario_context, configuration, requirements):
+    payload = make_payload(question, scenario_context, requirements, configuration["model"])
+    with trace_model_call(payload, PROMPT_VERSION, requirements["version"]) as trace:
+        result = _generate_answer(question, scenario_context, configuration, requirements)
+        trace.record_output(result)
+        return {**result, **trace.identifiers()}
+
+
+def _generate_answer(question, scenario_context, configuration, requirements):
     if not configuration["key"]:
         raise ChatError("Add your Groq key locally with: python3 server.py --setup-key", 503)
     if configuration["model"] not in MODELS:
@@ -213,6 +223,8 @@ def main():
         print("Key saved locally in ignored .env. Run: python3 server.py")
         return
     configuration = load_configuration()
+    if initialize_tracing():
+        print("Phoenix tracing enabled: project gamedesk at http://127.0.0.1:6006")
     requirements = json.loads((ROOT / "requirements.json").read_text())
     for filename in ("requirements.json", "cases.json"):
         (ROOT / "ui" / "dist" / filename).write_bytes((ROOT / filename).read_bytes())
@@ -225,6 +237,7 @@ def main():
         pass
     finally:
         server.server_close()
+        flush_traces()
 
 
 if __name__ == "__main__":
