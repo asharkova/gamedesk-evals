@@ -10,7 +10,7 @@ The first version focuses on game and DLC refund questions using public PlayStat
 - 15 draft test cases covering refunds, unclear requests, and attempts to override the rules.
 - A session export for reviewing example conversations.
 
-You can explore draft reference answers or connect a hosted Groq model through the Python backend. The initial cases and reference answers were drafted with AI and still need human review. Phoenix and DeepEval are next; no quality evaluation results are available yet.
+You can explore draft reference answers or connect a hosted Groq model through the Python backend. The initial cases and reference answers were drafted with AI and still need human review. Phoenix and DeepEval are next.
 
 ## Try it locally
 
@@ -25,6 +25,12 @@ For live answers, create a key on [Groq's Free plan](https://console.groq.com/ke
 The interface runs locally; Groq hosts the model. Only submitted questions, optional synthetic scenario facts, and public requirements are sent to Groq. Expected answers stay out of the model prompt. Each request is independent. The existing hosted site remains a static reference preview.
 
 Run the backend checks with `python3 -m unittest discover -s tests -v`. These use simulated API responses; a real key is needed to verify live access.
+
+## Check real answers
+
+Run `python3 evaluate.py --limit 3` for a small live check, or `python3 evaluate.py` for all development cases. The runner compares decisions and required rule references, then saves actual answers and results in ignored `results/private/`. It sends questions and policies, never expected answers, to Groq. Calls are spaced out; rate-limit or setup errors stop the remaining cases without retries.
+
+A pass means those specific checks matched the draft expectation. It does not prove every sentence is correct. Review unsupported claims and confirm the expected answers yourself.
 
 ## Policy sources
 
