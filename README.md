@@ -4,40 +4,6 @@ I’m building a small gaming-support assistant to learn how to test AI answers:
 
 The first version focuses on game and DLC refund questions using public PlayStation Store policies for Canada.
 
-## What works so far
-
-- A simple UI for exploring sample questions and policy references.
-- 39 test scenarios covering refunds, unclear requests, privacy, and attempts to override the rules: 15 AI-created and 24 credited to Anna as project owner.
-- A session export for reviewing example conversations.
-
-You can explore example answers or connect a hosted Groq model through the Python backend. Each case records its creator. Example answers are AI-drafted; real model responses still need human review. Phoenix tracing is integrated; DeepEval is not implemented.
-
-## Try it locally
-
-```sh
-python3 server.py
-```
-
-Open http://127.0.0.1:8000. More details are in the [UI README](ui/README.md).
-
-For live answers, create a key on [Groq's Free plan](https://console.groq.com/keys), run `python3 server.py --setup-key`, then start the server again. The hidden prompt saves your key to an ignored local `.env` file. Don't share or commit it. The default model is `openai/gpt-oss-20b`; free-tier limits apply. The app cannot check your billing plan, so keep the Groq account on Free.
-
-The interface runs locally; Groq hosts the model. Only submitted questions, optional synthetic scenario facts, and public requirements are sent to Groq. Expected answers stay out of the model prompt. Each request is independent. The existing hosted site remains a static reference preview.
-
-Run the backend checks with `python3 -m unittest discover -s tests -v`. These use simulated API responses; a real key is needed to verify live access.
-
-## Check real answers
-
-Run `python3 evaluate.py --limit 3` for a small live check, or `python3 evaluate.py` for all development cases. The runner compares decisions and required rule references, then saves actual answers and results in ignored `results/private/`. It sends questions and policies, never expected answers, to Groq. Calls are spaced out; rate-limit or setup errors stop the remaining cases without retries.
-
-A pass means those specific checks matched the draft expectation. It does not prove every sentence is correct. Review unsupported claims and confirm the expected answers yourself.
-
-## Phoenix dashboard
-
-Phoenix uses a separate Python 3.13 environment. To reproduce the setup, create a `.venv` with Python 3.13 and install `requirements-phoenix.txt` into it. Start the dashboard with `python3 start_phoenix.py`, then open http://127.0.0.1:6006.
-
-Run `.venv/bin/python server.py` for traced chat or `.venv/bin/python evaluate.py --limit 3` for traced checks. Open the `gamedesk` project in Phoenix. Traces contain the question, policy prompt, answer, model, duration, and error status, but not API keys or request headers. Trace IDs are also saved in model responses and evaluation reports. Data stays in ignored `results/private/phoenix/`. Set `GAMEDESK_TRACING=0` to disable capture. Prompts and answers may contain whatever you submit, so use synthetic data.
-
 ## Policy sources
 
 Reviewed November 11, 2026:
