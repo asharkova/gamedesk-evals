@@ -4,6 +4,10 @@ I’m building a small gaming-support assistant to learn how to test AI answers:
 
 The first version focuses on game and DLC refund questions using public PlayStation Store policies for Canada.
 
+## Test cases
+
+Find the evaluation scenarios in [cases.json](cases.json). Each case includes a question, an expected decision, relevant rule references, and creator attribution; some also include clarification requirements or claims the answer must avoid.
+
 ## Policy sources
 
 Reviewed November 11, 2026:
