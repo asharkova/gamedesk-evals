@@ -7,10 +7,10 @@ The first version focuses on game and DLC refund questions using public PlayStat
 ## What works so far
 
 - A simple UI for exploring sample questions and policy references.
-- 15 draft test cases covering refunds, unclear requests, and attempts to override the rules.
+- 39 test scenarios covering refunds, unclear requests, privacy, and attempts to override the rules: 15 AI-created and 24 credited to Anna as project owner.
 - A session export for reviewing example conversations.
 
-You can explore draft reference answers or connect a hosted Groq model through the Python backend. The initial cases and reference answers were drafted with AI and still need human review. Phoenix and DeepEval are next.
+You can explore example answers or connect a hosted Groq model through the Python backend. Each case records its creator. Example answers are AI-drafted; real model responses still need human review. Phoenix tracing is integrated; DeepEval is not implemented.
 
 ## Try it locally
 

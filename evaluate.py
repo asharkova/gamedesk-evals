@@ -23,6 +23,9 @@ def check_answer(test_case, actual):
         "review_notes": {
             "clarification_topics": test_case.get("must_ask_about", []),
             "claims_to_review": test_case.get("must_not_claim", []),
+            "requests_to_avoid": test_case.get("must_not_request", []),
+            "text_not_to_echo": test_case.get("must_not_echo", []),
+            "additional_expectations": test_case.get("human_review_expectations", []),
             "always_check": "Unsupported claims, appropriate clarification, and consistency between prose and decision.",
         },
     }
@@ -42,10 +45,12 @@ def run_evaluation(dataset, requirements, configuration, limit=None, interval=20
         record = {
             "case_id": test_case["id"], "category": test_case["category"],
             "question": test_case["question"],
+            "created_by": test_case.get("created_by", "Unspecified"),
+            "scenario_context": test_case.get("scenario_context", dataset["base_facts"]),
             "expected": {"decision": test_case["decision"], "rule_ids": test_case["rule_ids"]},
         }
         try:
-            actual = generate_answer(test_case["question"], dataset["base_facts"], configuration, requirements)
+            actual = generate_answer(test_case["question"], test_case.get("scenario_context", dataset["base_facts"]), configuration, requirements)
             record.update(check_answer(test_case, actual))
             record["actual"] = actual
         except ChatError as error:
@@ -60,7 +65,7 @@ def run_evaluation(dataset, requirements, configuration, limit=None, interval=20
         "created_at": datetime.now(timezone.utc).isoformat(),
         "model": configuration["model"], "provider": "Groq",
         "dataset_version": dataset["version"], "requirements_version": requirements["version"],
-        "expectations_status": "AI-drafted; human review pending",
+        "expectations_status": "Mixed AI and project-owner scenarios; response review required",
         "criteria": "Exact decision and minimum required policy references; not a factual-correctness or hallucination score.",
         "settings": {"interval_seconds": interval, "case_limit": limit},
         "scenario_context": dataset["base_facts"],

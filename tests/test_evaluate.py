@@ -40,6 +40,14 @@ class EvaluationTests(unittest.TestCase):
         self.assertNotIn("key", report)
 
     @patch("evaluate.generate_answer")
+    def test_case_context_overrides_default_purchase_facts(self, mocked):
+        mocked.return_value = self.answer
+        self.dataset["cases"][0]["scenario_context"] = "Account region is unknown"
+        report = evaluate.run_evaluation(self.dataset, {"version": "test"}, {"model": "test-model"}, limit=1, interval=0)
+        self.assertEqual(mocked.call_args.args[1], "Account region is unknown")
+        self.assertEqual(report["cases"][0]["scenario_context"], "Account region is unknown")
+
+    @patch("evaluate.generate_answer")
     def test_rate_limit_stops_suite_without_false_passes(self, mocked):
         mocked.side_effect = ChatError("Free-tier limit reached.", 429)
         report = evaluate.run_evaluation(self.dataset, {"version": "test"}, {"model": "test-model"}, interval=0)
