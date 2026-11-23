@@ -20,7 +20,7 @@ On November 13, 2026, 39 test cases were run against Groq. The Python evaluator 
 >
 > Ten cases changed from pass to mismatch or vice versa despite the identical totals. The review is looking at what changed in the answers and which checks drove the differences.
 
-## Case study on a disputed in-game purchase
+## CASE STUDY
 
 In [TC-39](../cases.json), a customer asked for refunds for a game they had played and a separate in-game purchase they disputed. The bot explained the standard refund restriction for the game and advised contacting PlayStation Support about the disputed transaction. Anna found the response useful because it gave the customer a clear next step.
 
