@@ -1,10 +1,10 @@
-# GameDesk evaluation report
+# GameDesk Evaluation Report (Work in Progress)
 
-I evaluated how a GameDesk prototype handles refund questions about digital games and add-ons from the Canadian PlayStation Store. The development set contains 39 synthetic scenarios, including incomplete purchase details, reported faults, disputed transactions, and attempts to override the bot's instructions. I designed 24 scenarios and used 15 AI-drafted scenarios.
+This evaluation covers how the GameDesk prototype handles refund questions about digital games and add-ons from the Canadian PlayStation Store. The development set contains 39 synthetic scenarios, including incomplete purchase details, reported faults, disputed transactions, and attempts to override the bot's instructions. Anna, the project owner, wrote 24 scenarios. A language model drafted the remaining 15.
 
 ## Baseline results
 
-I ran the same 39 cases twice with GPT-OSS 20B on Groq on November 13, 2026. The Python evaluator checked whether the model returned the expected decision and supplied all required rule IDs. I used Arize Phoenix to inspect individual responses and their evaluation annotations.
+GPT-OSS 20B ran the same 39 cases twice on Groq on November 13, 2026. The Python evaluator checked whether the model returned the expected decision and supplied all required rule IDs. Arize Phoenix recorded the responses and displayed their evaluation annotations.
 
 | Measure | First run | Second run |
 | --- | ---: | ---: |
@@ -17,12 +17,12 @@ Ten cases changed from pass to mismatch or vice versa despite the identical tota
 
 ## Case study on a disputed in-game purchase
 
-In [TC-39](../cases.json), a customer asked for refunds for a game they had played and a separate in-game purchase they disputed. The bot explained the standard refund restriction for the game and advised contacting PlayStation Support about the disputed transaction. I was satisfied with the next step. It was clear whom to contact and why.
+In [TC-39](../cases.json), a customer asked for refunds for a game they had played and a separate in-game purchase they disputed. The bot explained the standard refund restriction for the game and advised contacting PlayStation Support about the disputed transaction. Anna found the response useful because it gave the customer a clear next step.
 
 The automatic result was a mismatch. The test expected `refer_to_support`, while the model's structured decision was `not_eligible_under_standard_policy`. That label reflected the answer about the base game. Two required rule IDs were also missing.
 
-I updated this case to accept either decision label and require `PS-05`, the reference for the official refund process and support. In my review of the text, I checked that the bot directed the customer to support for the disputed purchase specifically. I replayed the same saved answer against the updated criteria, and both checks passed. The new result reflects a change to the evaluation criteria.
+The case now accepts either decision label and requires `PS-05`, the reference for the official refund process and support. The manual review confirmed that the bot directed the customer to support for the disputed purchase specifically. The same saved answer passed both checks under the updated criteria.
 
 ## Next comparison
 
-I plan to run GPT-OSS 20B and GPT-OSS 120B on the same scenarios with the same prompt and evaluation criteria. I’ll compare the automated results and read a sample of the answers to see whether either model gives customers clearer next steps.
+The next comparison will use the same scenarios, prompt, and evaluation criteria for GPT-OSS 20B and GPT-OSS 120B. It will compare the automated results and review a sample of answers for how clearly each model explains the next step.
