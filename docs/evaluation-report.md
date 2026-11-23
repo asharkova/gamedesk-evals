@@ -15,7 +15,12 @@ On November 13, 2026, 39 test cases were run against Groq. The Python evaluator 
 | Both checks passed | 12/39 | 12/39 |
 | Model requests completed | 39/39 | 39/39 |
 
-Ten cases changed from pass to mismatch or vice versa despite the identical totals. These checks measure agreement with the test expectations. The wording, factual claims, and usefulness of a response also need human review.
+> [!NOTE]
+> **INVESTIGATION IN PROGRESS**
+>
+> Ten cases changed from pass to mismatch or vice versa despite the identical totals. The review is looking at what changed in the answers and which checks drove the differences.
+
+These checks measure agreement with the test expectations. The wording, factual claims, and usefulness of a response also need human review.
 
 ## Case study on a disputed in-game purchase
 
