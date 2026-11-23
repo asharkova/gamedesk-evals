@@ -46,3 +46,7 @@ Reviewed November 11, 2026:
 - [Refund-request guide](https://www.playstation.com/en-ca/support/store/ps-store-refund-request/)
 
 This is an independent learning project, not official PlayStation support. It cannot access accounts or issue refunds.
+
+## Evaluation report
+
+Read the [Evaluation Report](docs/evaluation-report.md) for the baseline results and a case study on reviewing an automated mismatch.
