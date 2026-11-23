@@ -715,11 +715,7 @@
         "not_eligible_under_standard_policy"
       ],
       "rule_ids": [
-        "PS-01",
-        "PS-05",
-        "APP-01",
-        "APP-02",
-        "APP-04"
+        "PS-05"
       ],
       "must_ask_about": [
         "what the in-game purchase was",
