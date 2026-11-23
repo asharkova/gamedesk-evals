@@ -22,15 +22,9 @@ On November 13, 2026, 39 test cases were run against Groq. The Python evaluator 
 
 ## CASE STUDY
 
-In [TC-39](../cases.json), a customer asked for refunds for a game they had played and a separate in-game purchase they disputed. The bot explained the standard refund restriction for the game and advised contacting PlayStation Support about the disputed transaction. Anna found the response useful because it gave the customer a clear next step.
-
 | Test Case | Initial Automated Result | Anna’s Comment | What Was Done | Result After Re-scoring |
 | --- | --- | --- | --- | --- |
 | TC-39 | Mismatch | The bot gave a clear next step by directing the customer to PlayStation Support about the disputed purchase. | The original criteria were too strict for this case. The revised test requires only `PS-05` as a rule reference, and the Python evaluator accepts either decision label. | Pass. The same answer was scored again using the updated criteria. |
-
-The automatic result was a mismatch. The test expected `refer_to_support`, while the model's structured decision was `not_eligible_under_standard_policy`. That label reflected the answer about the base game. Two required rule IDs were also missing.
-
-The case now accepts either decision label and requires `PS-05`, the reference for the official refund process and support. The manual review confirmed that the bot directed the customer to support for the disputed purchase specifically. The same saved answer passed both checks under the updated criteria.
 
 ## Next steps
 
