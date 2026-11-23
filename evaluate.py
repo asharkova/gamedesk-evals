@@ -11,8 +11,9 @@ from gamedesk_tracing import flush_traces, initialize_tracing
 def check_answer(test_case, actual):
     expected_rules = set(test_case["rule_ids"])
     actual_rules = set(actual["rule_ids"])
+    accepted_decisions = [test_case["decision"]] + test_case.get("alternative_decisions", [])
     checks = {
-        "decision_matches": actual["decision"] == test_case["decision"],
+        "decision_matches": actual["decision"] in accepted_decisions,
         "required_references_present": expected_rules <= actual_rules,
     }
     return {
