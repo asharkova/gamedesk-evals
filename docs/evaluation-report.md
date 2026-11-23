@@ -1,6 +1,6 @@
 # GameDesk Evaluation Report (Work in Progress) · Updated November 23, 2026
 
-This evaluation covers how the GameDesk prototype handles refund questions about digital games and add-ons from the Canadian PlayStation Store. The development set contains 39 synthetic scenarios, including incomplete purchase details, reported faults, disputed transactions, and attempts to override the bot's instructions. Anna, the project owner, wrote 24 scenarios. A language model drafted the remaining 15.
+When someone asks GameDesk for a refund, can the bot give them a clear next step without guessing about their purchase? The evaluation covers 39 simulated support scenarios based on the Canadian PlayStation Store refund policy, from straightforward refunds to disputed in-game purchases.
 
 ## Baseline results
 
