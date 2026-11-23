@@ -4,7 +4,7 @@
 
 When someone asks GameDesk for a refund, can the bot give them a clear next step without guessing about their purchase? The evaluation covers 39 simulated support scenarios based on the Canadian PlayStation Store refund policy, from straightforward refunds to disputed in-game purchases.
 
-## Baseline results
+## INITIAL EVALUATION RESULTS
 
 GPT-OSS 20B ran the same 39 cases twice on Groq on November 13, 2026. The Python evaluator checked whether the model returned the expected decision and supplied all required rule IDs. Arize Phoenix recorded the responses and displayed their evaluation annotations.
 
