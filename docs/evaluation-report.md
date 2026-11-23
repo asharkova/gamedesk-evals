@@ -1,5 +1,7 @@
 # GameDesk Evaluation Report (Work in Progress) · Updated November 23, 2026
 
+## EVALUATION GOAL
+
 When someone asks GameDesk for a refund, can the bot give them a clear next step without guessing about their purchase? The evaluation covers 39 simulated support scenarios based on the Canadian PlayStation Store refund policy, from straightforward refunds to disputed in-game purchases.
 
 ## Baseline results
