@@ -6,7 +6,7 @@ When someone asks GameDesk for a refund, can the bot give them a clear next step
 
 ## INITIAL EVALUATION RESULTS
 
-GPT-OSS 20B ran the same 39 cases twice on Groq on November 13, 2026. The Python evaluator checked whether the model returned the expected decision and supplied all required rule IDs. Arize Phoenix recorded the responses and displayed their evaluation annotations.
+On November 13, 2026, 39 test cases were run against Groq. The Python evaluator checked whether the model returned the expected decision and supplied all required rule IDs. Arize Phoenix recorded the responses and displayed their evaluation annotations.
 
 | Measure | First run | Second run |
 | --- | ---: | ---: |
