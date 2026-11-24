@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 
 import evaluate
-from server import ChatError
+from gamedesk_model import ChatError
 
 
 class EvaluationTests(unittest.TestCase):

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import time
 
-from server import ChatError, ROOT, generate_answer, load_configuration
+from gamedesk_model import ChatError, ROOT, generate_answer, load_configuration
 from gamedesk_tracing import flush_traces, initialize_tracing
 
 
